@@ -1,28 +1,12 @@
-<!DOCTYPE html>
-<html>
-
-<body>
-    <button id="send">Send message</button>
-
-    <script>
-        const socket = new WebSocket('ws://localhost:8080');
-
-        socket.addEventListener('open', () => {
-            console.log('Connected to server!');
-        });
-
-        socket.addEventListener('message', (event) => {
-            console.log('Server says:', event.data);
-        });
-
-        socket.addEventListener('close', () => {
-            console.log('Disconnected');
-        });
-
-        document.querySelector('#send').addEventListener('click', () => {
-            socket.send('Hello from the browser!');
-        });
-    </script>
-</body>
-
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Drive</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
