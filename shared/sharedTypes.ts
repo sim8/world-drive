@@ -9,15 +9,14 @@ export type ServerMessage = {
         userState: UserState
     }
 } | {
-    type: 'ECHO'
+    type: 'PLAYERS_UPDATED'
     data: {
-        message: string
+        players: UserState[]
     }
 }
 
 export type ClientMessage = {
     type: 'SET_NAME'
-    userId: string
     data: {
         name: string
     }

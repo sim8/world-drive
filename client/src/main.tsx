@@ -5,7 +5,7 @@ import './style.css';
 
 function App() {
   const [name, setName] = useState('');
-  const { connected, sendMessage, userState, setName: setUserName } = useSocket();
+  const { connected, playerState, userState, setName: setUserName } = useSocket();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -35,7 +35,11 @@ function App() {
           <button type="submit" disabled={!name.trim() || !connected}>Continue</button>
         </form>
       </dialog>
-      {userState?.name && <button onClick={() => setName('Hello from the browser!')} disabled={!connected}>Send message</button>}
+      {userState?.name && <h1>Welcome, {userState.name}!</h1>}
+      <h2>Connected players</h2>
+      <ul>
+        {playerState?.map(player => <li>{player.name ?? "(No name)"}</li>)}
+      </ul>
     </main>
   );
 }

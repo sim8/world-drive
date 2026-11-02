@@ -11,14 +11,30 @@ function createId() {
 const state: Record<string, { name?: string }> = {}
 
 wss.on('connection', (socket) => {
+  let userId: string;
 
   function sendMessage(message: ServerMessage) {
     const jsonStr = JSON.stringify(message)
     socket.send(jsonStr)
   }
 
-  function handleMessage({ type, userId, data }: ClientMessage) {
-    if (!state[userId]) {
+  function broadcastMessage(message: ServerMessage) {
+    const jsonStr = JSON.stringify(message)
+    wss.clients.forEach(s => {
+      s.send(jsonStr)
+    })
+  }
+
+  function broadcastState() {
+    broadcastMessage({
+      type: 'PLAYERS_UPDATED', data: {
+        players: Object.values(state)
+      }
+    })
+  }
+
+  function handleMessage({ type, data }: ClientMessage) {
+    if (!userId) {
       return
     }
     switch (type) {
@@ -28,26 +44,27 @@ wss.on('connection', (socket) => {
     }
   }
 
-  const userId = createId();
+  userId = createId();
   state[userId] = {}
 
   sendMessage({
     type: 'CONNECTION_SUCCESSFUL',
     data: { userId, userState: state[userId] }
   });
+  broadcastState()
+
 
   socket.on('message', (data) => {
     const dataStr = data.toString();
     const clientMessage: ClientMessage = JSON.parse(dataStr);
     handleMessage(clientMessage)
-
-    sendMessage({
-      type: 'ECHO',
-      data: { message: data.toString() }
-    });
+    broadcastState()
   });
 
   socket.on('close', () => {
+    // TODO handle disconnects
+    delete state[userId]
+    broadcastState()
     console.log('Client disconnected');
   });
 });

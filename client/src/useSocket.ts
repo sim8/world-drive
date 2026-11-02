@@ -6,6 +6,7 @@ export function useSocket() {
   const socketRef = useRef<WebSocket | null>(null);
   const [userId, setUserId] = useState<string>()
   const [userState, setUserState] = useState<UserState>();
+  const [playerState, setPlayerState] = useState<UserState[]>();
 
   function handleMessage({ type, data }: ServerMessage) {
     switch (type) {
@@ -14,8 +15,8 @@ export function useSocket() {
         setUserState(data.userState);
         console.log('got my ID!', data.userId)
         return
-      case 'ECHO':
-        console.log('echoing: ', data.message)
+      case 'PLAYERS_UPDATED':
+        setPlayerState(data.players);
         return
     }
   }
@@ -56,11 +57,10 @@ export function useSocket() {
 
     sendMessage({
       type: 'SET_NAME',
-      userId,
       data: { name: trimmedName },
     })
     setUserState((current) => ({ ...current, name: trimmedName }));
   }
 
-  return { connected, sendMessage, userState, setName };
+  return { connected, sendMessage, userState, playerState, setName };
 }
