@@ -5,20 +5,24 @@ import './style.css';
 
 function App() {
   const [name, setName] = useState('');
-  const [submittedName, setSubmittedName] = useState('');
-  const { connected, sendMessage } = useSocket(Boolean(submittedName));
+  const { connected, sendMessage, userState, setName: setUserName } = useSocket();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (userState && !userState.name?.trim()) {
+      if (!dialog.open) dialog.showModal();
+    } else {
+      dialog.close();
+    }
+  }, [userState]);
 
   function start(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedName = name.trim();
     if (!trimmedName) return;
-    setSubmittedName(trimmedName);
-    dialogRef.current?.close();
+    setUserName(trimmedName);
   }
 
   return (
@@ -28,10 +32,10 @@ function App() {
           <h1 id="name-title">Enter name</h1>
           <label htmlFor="name">Name</label>
           <input id="name" value={name} onChange={(event) => setName(event.target.value)} autoFocus required />
-          <button type="submit" disabled={!name.trim()}>Continue</button>
+          <button type="submit" disabled={!name.trim() || !connected}>Continue</button>
         </form>
       </dialog>
-      {submittedName && <button onClick={() => sendMessage('Hello from the browser!')} disabled={!connected}>Send message</button>}
+      {userState?.name && <button onClick={() => setName('Hello from the browser!')} disabled={!connected}>Send message</button>}
     </main>
   );
 }

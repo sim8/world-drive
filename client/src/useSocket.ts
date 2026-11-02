@@ -1,12 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
+import type { ClientMessage, ServerMessage, UserState } from '../../shared/sharedTypes';
 
-export function useSocket(enabled: boolean) {
+export function useSocket() {
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
+  const [userId, setUserId] = useState<string>()
+  const [userState, setUserState] = useState<UserState>();
+
+  function handleMessage({ type, data }: ServerMessage) {
+    switch (type) {
+      case 'CONNECTION_SUCCESSFUL':
+        setUserId(data.userId)
+        setUserState(data.userState);
+        console.log('got my ID!', data.userId)
+        return
+      case 'ECHO':
+        console.log('echoing: ', data.message)
+        return
+    }
+  }
 
   useEffect(() => {
-    if (!enabled) return;
-
     const socket = new WebSocket('ws://localhost:8080');
     socketRef.current = socket;
 
@@ -15,7 +29,8 @@ export function useSocket(enabled: boolean) {
       console.log('Connected to server!');
     });
     socket.addEventListener('message', (event) => {
-      console.log('Server says:', event.data);
+      const message: ServerMessage = JSON.parse(event.data);
+      handleMessage(message)
     });
     socket.addEventListener('close', () => {
       setConnected(false);
@@ -26,13 +41,26 @@ export function useSocket(enabled: boolean) {
       socketRef.current = null;
       socket.close();
     };
-  }, [enabled]);
+  }, []);
 
-  function sendMessage(message: string) {
+  function sendMessage(message: ClientMessage) {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(message);
+      const messageStr = JSON.stringify(message)
+      socketRef.current.send(messageStr);
     }
   }
 
-  return { connected, sendMessage };
+  function setName(name: string) {
+    const trimmedName = name.trim();
+    if (!trimmedName || !userId || socketRef.current?.readyState !== WebSocket.OPEN) return;
+
+    sendMessage({
+      type: 'SET_NAME',
+      userId,
+      data: { name: trimmedName },
+    })
+    setUserState((current) => ({ ...current, name: trimmedName }));
+  }
+
+  return { connected, sendMessage, userState, setName };
 }
