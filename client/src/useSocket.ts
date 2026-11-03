@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ClientMessage, ServerMessage, UserState } from '../../shared/sharedTypes';
 
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+
 export function useSocket() {
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
@@ -22,7 +24,7 @@ export function useSocket() {
   }
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket(WEBSOCKET_URL);
     socketRef.current = socket;
 
     socket.addEventListener('open', () => {
