@@ -1,7 +1,8 @@
 import { WebSocketServer } from 'ws';
 import type { ClientMessage, ServerMessage } from '../shared/sharedTypes';
 
-const wss = new WebSocketServer({ port: 8080 });
+const port = Number(process.env.PORT ?? 8080)
+const wss = new WebSocketServer({ port, host:'0.0.0.0' });
 
 let _nextId = 0;
 function createId() {
