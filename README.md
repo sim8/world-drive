@@ -8,6 +8,13 @@ root; dependencies for both apps are recorded in the root `pnpm-lock.yaml`.
 - Client: `pnpm --filter client dev`
 - Server: `pnpm --filter server dev`
 - Client build and type check: `pnpm --filter client build`
+- Server build and type check: `pnpm --filter server build`
+- Run the compiled server: `pnpm --filter server start`
+
+The server uses `tsx watch` during development. Its production build uses
+TypeScript to check types and emit JavaScript, which Node runs at startup.
+The compiler preserves the `server` and `shared` directory layout under
+`server/dist`, so the entry point is `server/dist/server/index.js`.
 
 ## Railway
 
@@ -29,7 +36,7 @@ server is unnecessary. Set `VITE_WEBSOCKET_URL` on this service before building.
 ### Server service
 
 - Root Directory: `/`
-- Build Command: leave empty (there is no server build step)
+- Build Command: `pnpm --filter server build`
 - Start Command: `pnpm --filter server start`
 
 Do not set `RAILPACK_SPA_OUTPUT_DIR` on the server service. The server reads
