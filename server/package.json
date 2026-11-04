@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "pnpm build && node --test index.test.cjs",
     "dev": "tsx watch index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server/index.js"

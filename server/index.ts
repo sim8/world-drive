@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 import type { ClientMessage, ServerMessage } from '../shared/sharedTypes';
+import { clientMessageSchema } from '../shared/sharedTypes';
 
 const port = Number(process.env.PORT ?? 8080)
 const wss = new WebSocketServer({ port, host:'0.0.0.0' });
@@ -41,6 +42,7 @@ wss.on('connection', (socket) => {
     switch (type) {
       case 'SET_NAME': {
         state[userId].name = data.name
+        sendMessage({ type: 'USER_UPDATED', data: { userState: state[userId] } })
       }
     }
   }
@@ -56,9 +58,34 @@ wss.on('connection', (socket) => {
 
 
   socket.on('message', (data) => {
-    const dataStr = data.toString();
-    const clientMessage: ClientMessage = JSON.parse(dataStr);
-    handleMessage(clientMessage)
+    let input: unknown;
+    try {
+      input = JSON.parse(data.toString());
+    } catch {
+      sendMessage({
+        type: 'ERROR',
+        data: { code: 'INVALID_JSON', message: 'Message must contain valid JSON.' },
+      });
+      return;
+    }
+
+    const result = clientMessageSchema.safeParse(input);
+    if (!result.success) {
+      sendMessage({
+        type: 'ERROR',
+        data: {
+          code: 'INVALID_MESSAGE',
+          message: 'Invalid client message.',
+          issues: result.error.issues.map((issue) => ({
+            path: issue.path.map(String).join('.'),
+            message: issue.message,
+          })),
+        },
+      });
+      return;
+    }
+
+    handleMessage(result.data)
     broadcastState()
   });
 
@@ -71,5 +98,6 @@ wss.on('connection', (socket) => {
 });
 
 wss.on('listening', () => {
-  console.log(`WebSocket server listening on port ${port}`);
+  const address = wss.address();
+  console.log(`WebSocket server listening on port ${typeof address === 'object' && address ? address.port : port}`);
 });
