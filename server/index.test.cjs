@@ -88,4 +88,21 @@ test('rejects invalid messages without changing state, then accepts a valid name
       type: 'PLAYERS_UPDATED', data: { players: [{ name: name.trim() }] },
     });
   }
+
+  // A message exactly at the transport limit still reaches validation.
+  socket.send('{}'.padEnd(4 * 1024));
+  assert.equal((await nextMessage()).data.code, 'INVALID_MESSAGE');
+
+  // The limit applies to the complete message, even across multiple frames.
+  const closed = once(socket, 'close');
+  socket.send('{}'.padEnd(2 * 1024), { fin: false });
+  socket.send(' '.repeat(2 * 1024 + 1), { fin: true });
+  assert.equal((await closed)[0], 1009);
+  assert.deepEqual(messages, []);
+
+  // An oversized message must not crash the server.
+  const nextSocket = new WebSocket(`ws://127.0.0.1:${port}`);
+  t.after(() => nextSocket.terminate());
+  const [data] = await once(nextSocket, 'message');
+  assert.equal(JSON.parse(data.toString()).type, 'CONNECTION_SUCCESSFUL');
 });

@@ -3,7 +3,7 @@ import type { ClientMessage, ServerMessage } from '../shared/sharedTypes';
 import { clientMessageSchema } from '../shared/sharedTypes';
 
 const port = Number(process.env.PORT ?? 8080)
-const wss = new WebSocketServer({ port, host:'0.0.0.0' });
+const wss = new WebSocketServer({ port, host:'0.0.0.0', maxPayload: 4 * 1024 });
 
 let _nextId = 0;
 function createId() {
@@ -13,6 +13,10 @@ function createId() {
 const state: Record<string, { name?: string }> = {}
 
 wss.on('connection', (socket) => {
+  socket.on('error', (error) => {
+    console.warn('WebSocket error:', error.message);
+  });
+
   let userId: string;
 
   function sendMessage(message: ServerMessage) {
