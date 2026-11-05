@@ -27,3 +27,18 @@ input, button {
   font: inherit;
   padding: 0.5rem;
 }
+
+body:has(.playground) { margin: 0; overflow: hidden; }
+.playground { position: relative; height: 100dvh; color: white; background: #273b42; }
+.game-canvas, .game-canvas canvas { width: 100%; height: 100%; display: block; }
+.game-overlay { position: absolute; inset: 0; pointer-events: none; padding: 28px 32px; display: flex; flex-direction: column; justify-content: space-between; text-shadow: 0 1px 8px #152321aa; }
+.game-title { display: flex; gap: 12px; align-items: center; letter-spacing: .12em; font-size: .85rem; }
+.game-title span { font-size: .65rem; opacity: .8; border-left: 1px solid #ffffff80; padding-left: 12px; }
+.game-bottom { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.game-controls { font-size: .75rem; line-height: 2.1; }
+.game-controls strong { margin-left: 10px; } .game-controls strong:first-child { margin-left: 0; }
+.game-controls a { color: white; pointer-events: auto; }
+.game-speed { display: flex; gap: 9px; align-items: center; } .game-speed strong { font-size: 4rem; line-height: .9; } .game-speed span { font-size: .65rem; line-height: 1.5; letter-spacing: .08em; }
+.reset-button { position: absolute; right: 32px; top: 24px; pointer-events: auto; border: 1px solid #ffffff80; background: #273b4277; color: white; border-radius: 4px; font-size: .8rem; cursor: pointer; }
+.game-status { align-self: center; background: #273b42dd; padding: 1rem; border-radius: 4px; }
+@media (max-width: 700px) { .game-overlay { padding: 18px; } .game-controls { max-width: 70%; } .game-speed strong { font-size: 2.8rem; } .reset-button { right: 18px; top: 14px; } }

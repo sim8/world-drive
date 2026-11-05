@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useSocket } from './useSocket';
 import { nameSchema } from '../../shared/sharedTypes';
+import { DrivingPlayground } from './DrivingPlayground';
 import './style.css';
 
-function App() {
+function Lobby() {
   const [name, setName] = useState('');
   const { connected, playerState, userState, setName: setUserName, error } = useSocket();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -44,6 +45,7 @@ function App() {
         </form>
       </dialog>
       {userState?.name && <h1>Welcome, {userState.name}!</h1>}
+      <p><a href="/">Back to driving</a></p>
       <h2>Connected players</h2>
       <ul>
         {playerState?.map(player => <li>{player.name ?? "(No name)"}</li>)}
@@ -54,4 +56,4 @@ function App() {
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing root element');
-createRoot(root).render(<App />);
+createRoot(root).render(window.location.pathname === '/lobby' ? <Lobby /> : <DrivingPlayground />);
